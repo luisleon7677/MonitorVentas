@@ -326,7 +326,15 @@ export default function App() {
               <div style={{ height: '250px', width: '100%' }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
-                    <Pie data={sourceStats} cx="50%" cy="50%" innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value">
+                    <Pie 
+                      data={sourceStats} 
+                      cx="50%" 
+                      cy="50%" 
+                      innerRadius={window.innerWidth < 480 ? 40 : 60} 
+                      outerRadius={window.innerWidth < 480 ? 60 : 80} 
+                      paddingAngle={5} 
+                      dataKey="value"
+                    >
                       {sourceStats.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
