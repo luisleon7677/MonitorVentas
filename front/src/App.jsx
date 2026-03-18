@@ -29,7 +29,7 @@ import {
 } from 'recharts';
 
 const COLORS = ['#e61919', '#ff4d4d', '#990000', '#cc0000', '#ff8080'];
-const API_URL = 'http://localhost:5000/api';
+const API_URL = window.location.origin.includes('localhost') ? 'http://localhost:5000/api' : '/api';
 const DEFAULT_LIMIT = 5;
 
 export default function App() {

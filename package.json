@@ -1,0 +1,11 @@
+{
+  "name": "monitor-ventas-root",
+  "version": "1.0.0",
+  "scripts": {
+    "install:front": "cd front && npm install",
+    "install:server": "cd server && npm install",
+    "build:front": "cd front && npm run build",
+    "postinstall": "npm run install:front && npm run install:server && npm run build:front",
+    "start": "cd server && npm start"
+  }
+}
