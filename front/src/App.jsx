@@ -1,73 +1,140 @@
-import React, { useState, useMemo } from 'react';
-import { 
-  TrendingUp, 
-  PlusCircle, 
-  BarChart3, 
-  PieChart as PieChartIcon, 
+import React, { useState, useMemo, useEffect } from 'react';
+import {
+  TrendingUp,
+  PlusCircle,
+  BarChart3,
+  PieChart as PieChartIcon,
   ShoppingBag,
-  Clock
+  Clock,
+  ChevronLeft,
+  ChevronRight,
+  Edit2,
+  Trash2,
+  XCircle,
+  Save
 } from 'lucide-react';
-import { 
-  BarChart, 
-  Bar, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  ResponsiveContainer, 
-  PieChart, 
-  Pie, 
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
   Cell,
   AreaChart,
   Area
 } from 'recharts';
-import { initialSalesData, sources, campaigns, products } from './mockData';
 
 const COLORS = ['#e61919', '#ff4d4d', '#990000', '#cc0000', '#ff8080'];
+const API_URL = 'http://localhost:5000/api';
+const DEFAULT_LIMIT = 5;
 
 export default function App() {
-  const [sales, setSales] = useState(initialSalesData);
+  const [sales, setSales] = useState([]);
+  const [pagination, setPagination] = useState({ page: 1, totalPages: 1, limit: DEFAULT_LIMIT, total: 0 });
+  const [loading, setLoading] = useState(true);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editId, setEditId] = useState(null);
+
   const [formData, setFormData] = useState({
-    campaign: campaigns[0],
-    product: products[0],
-    price: '',
-    source: sources[0]
+    codigo: '',
+    precio: '',
+    red_social: 'facebook'
   });
 
-  const totalSales = sales.length;
-  const totalRevenue = sales.reduce((acc, curr) => acc + curr.price, 0);
-  
+  const fetchSales = async (page = 1) => {
+    setLoading(true);
+    try {
+      const response = await fetch(`${API_URL}/sales?page=${page}&limit=${DEFAULT_LIMIT}`);
+      const result = await response.json();
+      setSales(result.data);
+      setPagination(result.pagination);
+    } catch (error) {
+      console.error('Error fetching sales:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchSales();
+  }, []);
+
+  const totalSales = pagination.total;
+  const totalRevenue = useMemo(() => {
+    return sales.reduce((acc, curr) => acc + curr.precio, 0);
+  }, [sales]);
+
   const sourceStats = useMemo(() => {
     const counts = {};
-    sales.forEach(s => counts[s.source] = (counts[s.source] || 0) + 1);
+    sales.forEach(s => counts[s.red_social] = (counts[s.red_social] || 0) + 1);
     return Object.entries(counts).map(([name, value]) => ({ name, value }));
   }, [sales]);
 
-  const campaignStats = useMemo(() => {
-    const counts = {};
-    sales.forEach(s => counts[s.campaign] = (counts[s.campaign] || 0) + 1);
-    return Object.entries(counts).map(([name, sales]) => ({ name, sales }));
-  }, [sales]);
-
-  const timelineData = useMemo(() => {
-    const dates = {};
-    sales.forEach(s => dates[s.date] = (dates[s.date] || 0) + 1);
-    return Object.entries(dates)
-      .sort(([a], [b]) => new Date(a) - new Date(b))
-      .map(([date, count]) => ({ date, count }));
-  }, [sales]);
-
-  const handleRegister = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.price) return;
-    const newSale = {
-      ...formData,
-      id: Date.now(),
-      price: parseFloat(formData.price),
-      date: new Date().toISOString().split('T')[0]
-    };
-    setSales([...sales, newSale]);
-    setFormData({ ...formData, price: '' });
+    if (!formData.codigo || !formData.precio) return;
+
+    try {
+      const url = isEditing ? `${API_URL}/sales/${editId}` : `${API_URL}/sales`;
+      const method = isEditing ? 'PATCH' : 'POST';
+
+      const response = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...formData,
+          precio: parseFloat(formData.precio)
+        })
+      });
+
+      if (response.ok) {
+        resetForm();
+        fetchSales(isEditing ? pagination.page : 1);
+      }
+    } catch (error) {
+      console.error('Error saving sale:', error);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('¿Estás seguro de eliminar este registro?')) return;
+
+    try {
+      const response = await fetch(`${API_URL}/sales/${id}`, {
+        method: 'DELETE'
+      });
+
+      if (response.ok) {
+        // If we delete the last item on the page, go back one page
+        const newPage = (sales.length === 1 && pagination.page > 1)
+          ? pagination.page - 1
+          : pagination.page;
+        fetchSales(newPage);
+      }
+    } catch (error) {
+      console.error('Error deleting sale:', error);
+    }
+  };
+
+  const startEdit = (sale) => {
+    setIsEditing(true);
+    setEditId(sale.id);
+    setFormData({
+      codigo: sale.codigo,
+      precio: sale.precio.toString(),
+      red_social: sale.red_social
+    });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const resetForm = () => {
+    setFormData({ codigo: '', precio: '', red_social: 'facebook' });
+    setIsEditing(false);
+    setEditId(null);
   };
 
   return (
@@ -82,9 +149,9 @@ export default function App() {
         </div>
         <div className="flex items-center gap-4">
           <div className="glass revenue-badge">
-            <span className="label-tiny">Total Revenue</span>
+            <span className="label-tiny">Page Revenue</span>
             <div style={{ fontSize: '24px', fontWeight: '900', fontFamily: 'monospace' }}>
-              ${totalRevenue.toLocaleString()}
+              S/.{totalRevenue.toLocaleString()}
             </div>
           </div>
         </div>
@@ -94,39 +161,60 @@ export default function App() {
         {/* Registration Form */}
         <section className="lg-col-span-4 flex flex-col gap-6">
           <div className="glass card-red-glow">
-            <div className="flex items-center gap-2" style={{ marginBottom: '24px' }}>
-              <PlusCircle className="text-red" size={20} />
-              <h2 style={{ fontSize: '1.25rem', fontWeight: 'bold' }}>Registrar Venta</h2>
-            </div>
-            
-            <form onSubmit={handleRegister} className="flex flex-col gap-4">
-              <div className="form-group">
-                <label className="label-tiny">Campaña</label>
-                <select value={formData.campaign} onChange={e => setFormData({...formData, campaign: e.target.value})}>
-                  {campaigns.map(c => <option key={c} value={c}>{c}</option>)}
-                </select>
+            <div className="flex items-center justify-between" style={{ marginBottom: '24px' }}>
+              <div className="flex items-center gap-2">
+                {isEditing ? <Edit2 className="text-red" size={20} /> : <PlusCircle className="text-red" size={20} />}
+                <h2 style={{ fontSize: '1.25rem', fontWeight: 'bold' }}>
+                  {isEditing ? 'Editar Venta' : 'Registrar Venta'}
+                </h2>
               </div>
+              {isEditing && (
+                <button onClick={resetForm} style={{ background: 'transparent', border: 'none', color: '#888', cursor: 'pointer' }}>
+                  <XCircle size={20} />
+                </button>
+              )}
+            </div>
 
+            <form onSubmit={handleSubmit} className="flex flex-col gap-4">
               <div className="form-group">
-                <label className="label-tiny">Producto</label>
-                <select value={formData.product} onChange={e => setFormData({...formData, product: e.target.value})}>
-                  {products.map(p => <option key={p} value={p}>{p}</option>)}
-                </select>
+                <label className="label-tiny">Código</label>
+                <input
+                  type="text"
+                  placeholder="Ej: PROD-001"
+                  value={formData.codigo}
+                  onChange={e => setFormData({ ...formData, codigo: e.target.value })}
+                />
               </div>
 
               <div className="form-group">
                 <label className="label-tiny">Precio</label>
-                <input type="number" placeholder="0.00" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} />
+                <input
+                  type="number"
+                  step="0.01"
+                  placeholder="0.00"
+                  value={formData.precio}
+                  onChange={e => setFormData({ ...formData, precio: e.target.value })}
+                />
               </div>
 
               <div className="form-group">
-                <label className="label-tiny">Fuente</label>
-                <select value={formData.source} onChange={e => setFormData({...formData, source: e.target.value})}>
-                  {sources.map(s => <option key={s} value={s}>{s}</option>)}
+                <label className="label-tiny">Red Social</label>
+                <select value={formData.red_social} onChange={e => setFormData({ ...formData, red_social: e.target.value })}>
+                  <option value="facebook">Facebook</option>
+                  <option value="tiktok">TikTok</option>
+                  <option value="instagram">Instagram</option>
+                  <option value="otros">Otros</option>
                 </select>
               </div>
 
-              <button type="submit" className="btn-primary">REGISTRAR VENTA</button>
+              <button type="submit" className="btn-primary">
+                {isEditing ? <span className="flex items-center justify-center gap-2"><Save size={18} /> ACTUALIZAR VENTA</span> : 'REGISTRAR VENTA'}
+              </button>
+              {isEditing && (
+                <button type="button" onClick={resetForm} className="btn-pagination" style={{ width: '100%', marginTop: '0' }}>
+                  CANCELAR
+                </button>
+              )}
             </form>
           </div>
 
@@ -136,7 +224,7 @@ export default function App() {
                 <ShoppingBag size={24} />
               </div>
               <div>
-                <p className="label-tiny">Total Ventas</p>
+                <p className="label-tiny">Total Ventas (Global)</p>
                 <h3 style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>{totalSales}</h3>
               </div>
             </div>
@@ -146,29 +234,94 @@ export default function App() {
 
         {/* Dashboard Main Area */}
         <section className="lg-col-span-8 flex flex-col gap-8">
-          <div className="grid md-grid-cols-2 gap-8">
-            <div className="glass card-red-glow">
-              <div className="flex items-center gap-2" style={{ marginBottom: '24px' }}>
-                <BarChart3 className="text-red" size={18} />
-                <h3 style={{ fontWeight: 'bold' }}>Ventas por Campaña</h3>
-              </div>
-              <div style={{ height: '250px', width: '100%' }}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={campaignStats}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#222" vertical={false} />
-                    <XAxis dataKey="name" stroke="#666" fontSize={10} tickLine={false} axisLine={false} />
-                    <YAxis stroke="#666" fontSize={10} tickLine={false} axisLine={false} />
-                    <Tooltip contentStyle={{ background: '#121212', border: '1px solid #222', borderRadius: '8px' }} />
-                    <Bar dataKey="sales" fill="#e61919" radius={[4, 4, 0, 0]} barSize={40} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
+          <div className="glass card-red-glow">
+            <div className="flex items-center gap-2" style={{ marginBottom: '24px' }}>
+              <TrendingUp className="text-red" size={18} />
+              <h3 style={{ fontWeight: 'bold' }}>Historial de Ventas</h3>
             </div>
 
+            <div className="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Fecha</th>
+                    <th>Código</th>
+                    <th>Precio</th>
+                    <th>Red Social</th>
+                    <th style={{ textAlign: 'right' }}>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {loading ? (
+                    <tr><td colSpan="5" style={{ textAlign: 'center', padding: '40px' }}>Cargando...</td></tr>
+                  ) : sales.length === 0 ? (
+                    <tr><td colSpan="5" style={{ textAlign: 'center', padding: '40px' }}>No hay ventas registradas</td></tr>
+                  ) : (
+                    sales.map(sale => (
+                      <tr key={sale.id} className={editId === sale.id ? 'editing' : ''}>
+                        <td style={{ color: '#888', fontSize: '12px' }}>
+                          {new Date(sale.fecha).toLocaleString()}
+                        </td>
+                        <td style={{ fontWeight: 'bold' }}>{sale.codigo}</td>
+                        <td style={{ fontFamily: 'monospace' }}>S/.{sale.precio.toFixed(2)}</td>
+                        <td>
+                          <span className={`badge badge-${sale.red_social}`}>
+                            {sale.red_social}
+                          </span>
+                        </td>
+                        <td style={{ textAlign: 'right' }}>
+                          <div className="flex justify-end gap-2">
+                            <button
+                              onClick={() => startEdit(sale)}
+                              className="btn-action edit"
+                              title="Editar"
+                            >
+                              <Edit2 size={14} />
+                            </button>
+                            <button
+                              onClick={() => handleDelete(sale.id)}
+                              className="btn-action delete"
+                              title="Eliminar"
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {pagination.totalPages > 1 && (
+              <div className="pagination">
+                <button
+                  className="btn-pagination"
+                  disabled={pagination.page <= 1}
+                  onClick={() => fetchSales(pagination.page - 1)}
+                >
+                  <ChevronLeft size={16} /> Anterior
+                </button>
+                <span className="page-info">
+                  Página {pagination.page} de {pagination.totalPages}
+                </span>
+                <button
+                  className="btn-pagination"
+                  disabled={pagination.page >= pagination.totalPages}
+                  onClick={() => fetchSales(pagination.page + 1)}
+                >
+                  Siguiente <ChevronRight size={16} />
+                </button>
+              </div>
+            )}
+          </div>
+
+          {sales.length > 0 && (
             <div className="glass card-red-glow">
               <div className="flex items-center gap-2" style={{ marginBottom: '24px' }}>
                 <PieChartIcon className="text-red" size={18} />
-                <h3 style={{ fontWeight: 'bold' }}>Distribución por Fuente</h3>
+                <h3 style={{ fontWeight: 'bold' }}>Distribución por Red Social (Página Actual)</h3>
               </div>
               <div style={{ height: '250px', width: '100%' }}>
                 <ResponsiveContainer width="100%" height="100%">
@@ -183,31 +336,7 @@ export default function App() {
                 </ResponsiveContainer>
               </div>
             </div>
-          </div>
-
-          <div className="glass card-red-glow">
-            <div className="flex items-center gap-2" style={{ marginBottom: '24px' }}>
-              <Clock className="text-red" size={18} />
-              <h3 style={{ fontWeight: 'bold' }}>Línea de Tiempo de Ventas</h3>
-            </div>
-            <div style={{ height: '300px', width: '100%' }}>
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={timelineData}>
-                  <defs>
-                    <linearGradient id="colorCount" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#e61919" stopOpacity={0.4}/>
-                      <stop offset="95%" stopColor="#e61919" stopOpacity={0}/>
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#222" vertical={false} />
-                  <XAxis dataKey="date" stroke="#666" fontSize={10} tickLine={false} axisLine={false} />
-                  <YAxis stroke="#666" fontSize={10} tickLine={false} axisLine={false} />
-                  <Tooltip contentStyle={{ background: '#121212', border: '1px solid #222', borderRadius: '8px' }} />
-                  <Area type="monotone" dataKey="count" stroke="#e61919" strokeWidth={3} fillOpacity={1} fill="url(#colorCount)" />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
+          )}
         </section>
       </div>
     </div>

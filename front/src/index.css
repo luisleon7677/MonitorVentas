@@ -166,3 +166,117 @@ input:focus, select:focus {
 ::-webkit-scrollbar-track { background: var(--bg-dark); }
 ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--primary-red); }
+
+/* Table Styles */
+.table-container {
+    width: 100%;
+    overflow-x: auto;
+    background: var(--bg-card);
+    border-radius: var(--radius);
+    border: 1px solid var(--border-color);
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+th {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 16px;
+    font-size: 12px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    font-weight: 800;
+}
+
+td {
+    padding: 16px;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 14px;
+}
+
+tr:hover {
+    background: rgba(230, 25, 25, 0.02);
+}
+
+.badge {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.badge-facebook { background: #1877F2; color: white; }
+.badge-tiktok { background: #000000; border: 1px solid #ff0050; color: white; }
+.badge-instagram { background: linear-gradient(45deg, #f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%); color: white; }
+.badge-otros { background: #444; color: white; }
+
+/* Pagination */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    margin-top: 24px;
+}
+
+.btn-pagination {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s;
+}
+
+.btn-pagination:hover:not(:disabled) {
+    border-color: var(--primary-red);
+    color: var(--primary-red);
+}
+
+.btn-pagination:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.page-info {
+    font-size: 14px;
+    color: var(--text-muted);
+}
+
+/* Row Actions */
+.btn-action {
+    background: #1a1a1a;
+    border: 1px solid #333;
+    color: #888;
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-action.edit:hover {
+    border-color: #3b82f6;
+    color: #3b82f6;
+    background: rgba(59, 130, 246, 0.1);
+}
+
+.btn-action.delete:hover {
+    border-color: var(--primary-red);
+    color: var(--primary-red);
+    background: rgba(230, 25, 25, 0.1);
+}
+
+tr.editing {
+    background: rgba(59, 130, 246, 0.05) !important;
+    border-left: 3px solid #3b82f6;
+}
