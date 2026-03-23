@@ -31,13 +31,15 @@ const LISTA_MARCAS = [
   "Lan Keratin",
   "Keratin gold",
   "Radiant",
-  "Salon in"
+  "Salon in",
+  "Otros"
 ];
 
 const LISTA_CAMPAÑAS = [
   "Campaña Segura",
   "Campaña Valery",
-  "Promoción Gemela"
+  "Promoción Gemela",
+  "Otros"
 ];
 
 const COLORS = ['#e61919', '#ff4d4d', '#990000', '#cc0000', '#ff8080'];
@@ -407,8 +409,8 @@ export default function Dashboard() {
             {brandStats.brandsCount.length > 0 && (
               <div className="glass card-red-glow">
                 <div className="flex items-center gap-2" style={{ marginBottom: '24px' }}>
-                   <ShoppingBag className="text-red" size={18} />
-                   <h3 style={{ fontWeight: 'bold' }}>Ventas por Marca (Cantidad)</h3>
+                  <ShoppingBag className="text-red" size={18} />
+                  <h3 style={{ fontWeight: 'bold' }}>Ventas por Marca (Cantidad)</h3>
                 </div>
                 <div style={{ height: '300px', width: '100%', minWidth: 0 }}>
                   <ResponsiveContainer width="99%" height="100%">
@@ -416,7 +418,7 @@ export default function Dashboard() {
                       <CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} />
                       <XAxis dataKey="name" stroke="#888" fontSize={12} tickLine={false} axisLine={false} />
                       <YAxis stroke="#888" fontSize={12} tickLine={false} axisLine={false} />
-                      <Tooltip 
+                      <Tooltip
                         contentStyle={{ background: '#121212', border: '1px solid #222', borderRadius: '8px' }}
                         itemStyle={{ color: '#ff4d4d' }}
                       />
@@ -430,8 +432,8 @@ export default function Dashboard() {
             {brandStats.brandsRevenue.length > 0 && (
               <div className="glass card-red-glow">
                 <div className="flex items-center gap-2" style={{ marginBottom: '24px' }}>
-                   <TrendingUp className="text-red" size={18} />
-                   <h3 style={{ fontWeight: 'bold' }}>Ventas por Marca (Ingresos S/.)</h3>
+                  <TrendingUp className="text-red" size={18} />
+                  <h3 style={{ fontWeight: 'bold' }}>Ventas por Marca (Ingresos S/.)</h3>
                 </div>
                 <div style={{ height: '300px', width: '100%', minWidth: 0 }}>
                   <ResponsiveContainer width="99%" height="100%">
@@ -439,7 +441,7 @@ export default function Dashboard() {
                       <CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} />
                       <XAxis dataKey="name" stroke="#888" fontSize={12} tickLine={false} axisLine={false} />
                       <YAxis stroke="#888" fontSize={12} tickLine={false} axisLine={false} />
-                      <Tooltip 
+                      <Tooltip
                         contentStyle={{ background: '#121212', border: '1px solid #222', borderRadius: '8px' }}
                         itemStyle={{ color: '#ff4d4d' }}
                       />
@@ -455,8 +457,8 @@ export default function Dashboard() {
             {campaignStats.campaignsCount.length > 0 && (
               <div className="glass card-red-glow">
                 <div className="flex items-center gap-2" style={{ marginBottom: '24px' }}>
-                   <ShoppingBag className="text-red" size={18} />
-                   <h3 style={{ fontWeight: 'bold' }}>Ventas por Campaña (Cantidad)</h3>
+                  <ShoppingBag className="text-red" size={18} />
+                  <h3 style={{ fontWeight: 'bold' }}>Ventas por Campaña (Cantidad)</h3>
                 </div>
                 <div style={{ height: '300px', width: '100%', minWidth: 0 }}>
                   <ResponsiveContainer width="99%" height="100%">
@@ -464,7 +466,7 @@ export default function Dashboard() {
                       <CartesianGrid strokeDasharray="3 3" stroke="#333" horizontal={false} />
                       <XAxis type="number" stroke="#888" fontSize={12} tickLine={false} axisLine={false} />
                       <YAxis dataKey="name" type="category" stroke="#888" fontSize={12} tickLine={false} axisLine={false} width={100} />
-                      <Tooltip 
+                      <Tooltip
                         contentStyle={{ background: '#121212', border: '1px solid #222', borderRadius: '8px' }}
                         itemStyle={{ color: '#ff4d4d' }}
                       />
@@ -478,8 +480,8 @@ export default function Dashboard() {
             {campaignStats.campaignsRevenue.length > 0 && (
               <div className="glass card-red-glow">
                 <div className="flex items-center gap-2" style={{ marginBottom: '24px' }}>
-                   <TrendingUp className="text-red" size={18} />
-                   <h3 style={{ fontWeight: 'bold' }}>Ventas por Campaña (Ingresos S/.)</h3>
+                  <TrendingUp className="text-red" size={18} />
+                  <h3 style={{ fontWeight: 'bold' }}>Ventas por Campaña (Ingresos S/.)</h3>
                 </div>
                 <div style={{ height: '300px', width: '100%', minWidth: 0 }}>
                   <ResponsiveContainer width="99%" height="100%">
@@ -487,7 +489,7 @@ export default function Dashboard() {
                       <CartesianGrid strokeDasharray="3 3" stroke="#333" horizontal={false} />
                       <XAxis type="number" stroke="#888" fontSize={12} tickLine={false} axisLine={false} />
                       <YAxis dataKey="name" type="category" stroke="#888" fontSize={12} tickLine={false} axisLine={false} width={100} />
-                      <Tooltip 
+                      <Tooltip
                         contentStyle={{ background: '#121212', border: '1px solid #222', borderRadius: '8px' }}
                         itemStyle={{ color: '#ff4d4d' }}
                       />
