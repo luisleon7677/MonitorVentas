@@ -18,10 +18,14 @@ import {
   Tooltip,
   ResponsiveContainer,
   Legend,
-  Label
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid
 } from 'recharts';
 
-const LISTA_PRODUCTOS = [
+const LISTA_MARCAS = [
   "Baor",
   "Hanna caball",
   "Lan Keratin",
@@ -43,6 +47,8 @@ const DEFAULT_LIMIT = 5;
 export default function Dashboard() {
   const [sales, setSales] = useState([]);
   const [globalStats, setGlobalStats] = useState([]);
+  const [brandStats, setBrandStats] = useState({ brandsCount: [], brandsRevenue: [] });
+  const [campaignStats, setCampaignStats] = useState({ campaignsCount: [], campaignsRevenue: [] });
   const [pagination, setPagination] = useState({ page: 1, totalPages: 1, limit: DEFAULT_LIMIT, total: 0 });
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
@@ -79,9 +85,31 @@ export default function Dashboard() {
     }
   };
 
+  const fetchBrandStats = async () => {
+    try {
+      const response = await fetch(`${API_URL}/stats/brands`);
+      const result = await response.json();
+      setBrandStats(result);
+    } catch (error) {
+      console.error('Error fetching brand stats:', error);
+    }
+  };
+
+  const fetchCampaignStats = async () => {
+    try {
+      const response = await fetch(`${API_URL}/stats/campaigns`);
+      const result = await response.json();
+      setCampaignStats(result);
+    } catch (error) {
+      console.error('Error fetching campaign stats:', error);
+    }
+  };
+
   useEffect(() => {
     fetchSales();
     fetchGlobalStats();
+    fetchBrandStats();
+    fetchCampaignStats();
   }, []);
 
   const totalSales = pagination.total;
@@ -111,6 +139,8 @@ export default function Dashboard() {
         resetForm();
         fetchSales(isEditing ? pagination.page : 1);
         fetchGlobalStats();
+        fetchBrandStats();
+        fetchCampaignStats();
       }
     } catch (error) {
       console.error('Error saving sale:', error);
@@ -131,6 +161,8 @@ export default function Dashboard() {
           : pagination.page;
         fetchSales(newPage);
         fetchGlobalStats();
+        fetchBrandStats();
+        fetchCampaignStats();
       }
     } catch (error) {
       console.error('Error deleting sale:', error);
@@ -193,14 +225,14 @@ export default function Dashboard() {
 
             <form onSubmit={handleSubmit} className="flex flex-col gap-4">
               <div className="form-group">
-                <label className="label-tiny">Producto</label>
+                <label className="label-tiny">Marca</label>
                 <select
                   value={formData.producto}
                   onChange={e => setFormData({ ...formData, producto: e.target.value })}
                   required
                 >
                   <option value="" disabled>Selecciona un producto</option>
-                  {LISTA_PRODUCTOS.map(p => <option key={p} value={p}>{p}</option>)}
+                  {LISTA_MARCAS.map(p => <option key={p} value={p}>{p}</option>)}
                 </select>
               </div>
 
@@ -274,7 +306,7 @@ export default function Dashboard() {
                 <thead>
                   <tr>
                     <th>Fecha</th>
-                    <th>Producto</th>
+                    <th>Marca</th>
                     <th>Campaña</th>
                     <th>Precio</th>
                     <th>Red Social</th>
@@ -370,6 +402,102 @@ export default function Dashboard() {
               </div>
             </div>
           )}
+
+          <div className="grid grid-cols-2 gap-8">
+            {brandStats.brandsCount.length > 0 && (
+              <div className="glass card-red-glow">
+                <div className="flex items-center gap-2" style={{ marginBottom: '24px' }}>
+                   <ShoppingBag className="text-red" size={18} />
+                   <h3 style={{ fontWeight: 'bold' }}>Ventas por Marca (Cantidad)</h3>
+                </div>
+                <div style={{ height: '300px', width: '100%', minWidth: 0 }}>
+                  <ResponsiveContainer width="99%" height="100%">
+                    <BarChart data={brandStats.brandsCount}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} />
+                      <XAxis dataKey="name" stroke="#888" fontSize={12} tickLine={false} axisLine={false} />
+                      <YAxis stroke="#888" fontSize={12} tickLine={false} axisLine={false} />
+                      <Tooltip 
+                        contentStyle={{ background: '#121212', border: '1px solid #222', borderRadius: '8px' }}
+                        itemStyle={{ color: '#ff4d4d' }}
+                      />
+                      <Bar dataKey="value" fill="#cc0000" radius={[4, 4, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+            )}
+
+            {brandStats.brandsRevenue.length > 0 && (
+              <div className="glass card-red-glow">
+                <div className="flex items-center gap-2" style={{ marginBottom: '24px' }}>
+                   <TrendingUp className="text-red" size={18} />
+                   <h3 style={{ fontWeight: 'bold' }}>Ventas por Marca (Ingresos S/.)</h3>
+                </div>
+                <div style={{ height: '300px', width: '100%', minWidth: 0 }}>
+                  <ResponsiveContainer width="99%" height="100%">
+                    <BarChart data={brandStats.brandsRevenue}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} />
+                      <XAxis dataKey="name" stroke="#888" fontSize={12} tickLine={false} axisLine={false} />
+                      <YAxis stroke="#888" fontSize={12} tickLine={false} axisLine={false} />
+                      <Tooltip 
+                        contentStyle={{ background: '#121212', border: '1px solid #222', borderRadius: '8px' }}
+                        itemStyle={{ color: '#ff4d4d' }}
+                      />
+                      <Bar dataKey="value" fill="#e61919" radius={[4, 4, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="grid grid-cols-2 gap-8" style={{ marginTop: '32px' }}>
+            {campaignStats.campaignsCount.length > 0 && (
+              <div className="glass card-red-glow">
+                <div className="flex items-center gap-2" style={{ marginBottom: '24px' }}>
+                   <ShoppingBag className="text-red" size={18} />
+                   <h3 style={{ fontWeight: 'bold' }}>Ventas por Campaña (Cantidad)</h3>
+                </div>
+                <div style={{ height: '300px', width: '100%', minWidth: 0 }}>
+                  <ResponsiveContainer width="99%" height="100%">
+                    <BarChart data={campaignStats.campaignsCount} layout="vertical">
+                      <CartesianGrid strokeDasharray="3 3" stroke="#333" horizontal={false} />
+                      <XAxis type="number" stroke="#888" fontSize={12} tickLine={false} axisLine={false} />
+                      <YAxis dataKey="name" type="category" stroke="#888" fontSize={12} tickLine={false} axisLine={false} width={100} />
+                      <Tooltip 
+                        contentStyle={{ background: '#121212', border: '1px solid #222', borderRadius: '8px' }}
+                        itemStyle={{ color: '#ff4d4d' }}
+                      />
+                      <Bar dataKey="value" fill="#990000" radius={[0, 4, 4, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+            )}
+
+            {campaignStats.campaignsRevenue.length > 0 && (
+              <div className="glass card-red-glow">
+                <div className="flex items-center gap-2" style={{ marginBottom: '24px' }}>
+                   <TrendingUp className="text-red" size={18} />
+                   <h3 style={{ fontWeight: 'bold' }}>Ventas por Campaña (Ingresos S/.)</h3>
+                </div>
+                <div style={{ height: '300px', width: '100%', minWidth: 0 }}>
+                  <ResponsiveContainer width="99%" height="100%">
+                    <BarChart data={campaignStats.campaignsRevenue} layout="vertical">
+                      <CartesianGrid strokeDasharray="3 3" stroke="#333" horizontal={false} />
+                      <XAxis type="number" stroke="#888" fontSize={12} tickLine={false} axisLine={false} />
+                      <YAxis dataKey="name" type="category" stroke="#888" fontSize={12} tickLine={false} axisLine={false} width={100} />
+                      <Tooltip 
+                        contentStyle={{ background: '#121212', border: '1px solid #222', borderRadius: '8px' }}
+                        itemStyle={{ color: '#ff4d4d' }}
+                      />
+                      <Bar dataKey="value" fill="#ff4d4d" radius={[0, 4, 4, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+            )}
+          </div>
         </section>
       </div>
     </div>

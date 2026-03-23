@@ -104,6 +104,60 @@ app.get('/api/stats/sources', (req, res) => {
     }
 });
 
+// Get stats by brand (producto)
+app.get('/api/stats/brands', (req, res) => {
+    try {
+        const countStmt = db.prepare(`
+            SELECT producto as name, COUNT(*) as value 
+            FROM sales 
+            WHERE producto IS NOT NULL AND producto != '' 
+            GROUP BY producto 
+            ORDER BY value DESC
+        `);
+        const brandsCount = countStmt.all();
+
+        const revenueStmt = db.prepare(`
+            SELECT producto as name, SUM(precio) as value 
+            FROM sales 
+            WHERE producto IS NOT NULL AND producto != '' 
+            GROUP BY producto 
+            ORDER BY value DESC
+        `);
+        const brandsRevenue = revenueStmt.all();
+
+        res.json({ brandsCount, brandsRevenue });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Get stats by campaign (campaña)
+app.get('/api/stats/campaigns', (req, res) => {
+    try {
+        const countStmt = db.prepare(`
+            SELECT campaña as name, COUNT(*) as value 
+            FROM sales 
+            WHERE campaña IS NOT NULL AND campaña != '' 
+            GROUP BY campaña 
+            ORDER BY value DESC
+        `);
+        const campaignsCount = countStmt.all();
+
+        const revenueStmt = db.prepare(`
+            SELECT campaña as name, SUM(precio) as value 
+            FROM sales 
+            WHERE campaña IS NOT NULL AND campaña != '' 
+            GROUP BY campaña 
+            ORDER BY value DESC
+        `);
+        const campaignsRevenue = revenueStmt.all();
+
+        res.json({ campaignsCount, campaignsRevenue });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 // Client CRUD operations
 app.post('/api/clients', (req, res) => {
     const { nombre, departamento, cantidad_ventas } = req.body;
