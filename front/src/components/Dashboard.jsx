@@ -22,17 +22,18 @@ import {
 } from 'recharts';
 
 const LISTA_PRODUCTOS = [
-  "Pack Emprendedor",
-  "Kit Premium",
-  "Suscripción Plus",
-  "Producto Individual"
+  "Baor",
+  "Hanna caball",
+  "Lan Keratin",
+  "Keratin gold",
+  "Radiant",
+  "Salon in"
 ];
 
 const LISTA_CAMPAÑAS = [
-  "Campaña Marzo",
-  "Campaña Abril",
-  "Promoción Verano",
-  "Venta Directa"
+  "Campaña Segura",
+  "Campaña Valery",
+  "Promoción Gemela"
 ];
 
 const COLORS = ['#e61919', '#ff4d4d', '#990000', '#cc0000', '#ff8080'];
@@ -193,8 +194,8 @@ export default function Dashboard() {
             <form onSubmit={handleSubmit} className="flex flex-col gap-4">
               <div className="form-group">
                 <label className="label-tiny">Producto</label>
-                <select 
-                  value={formData.producto} 
+                <select
+                  value={formData.producto}
                   onChange={e => setFormData({ ...formData, producto: e.target.value })}
                   required
                 >
@@ -205,8 +206,8 @@ export default function Dashboard() {
 
               <div className="form-group">
                 <label className="label-tiny">Campaña</label>
-                <select 
-                  value={formData.campaña} 
+                <select
+                  value={formData.campaña}
                   onChange={e => setFormData({ ...formData, campaña: e.target.value })}
                   required
                 >
@@ -348,13 +349,13 @@ export default function Dashboard() {
               <div style={{ height: '300px', width: '100%', minWidth: 0 }}>
                 <ResponsiveContainer width="99%" height="100%">
                   <PieChart>
-                    <Pie 
-                      data={globalStats} 
-                      cx="50%" 
-                      cy="50%" 
-                      innerRadius={60} 
-                      outerRadius={80} 
-                      paddingAngle={5} 
+                    <Pie
+                      data={globalStats}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={60}
+                      outerRadius={80}
+                      paddingAngle={5}
                       dataKey="value"
                       label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
                     >
@@ -363,7 +364,7 @@ export default function Dashboard() {
                       ))}
                     </Pie>
                     <Tooltip contentStyle={{ background: '#121212', border: '1px solid #222', borderRadius: '8px' }} />
-                    <Legend verticalAlign="bottom" height={36}/>
+                    <Legend verticalAlign="bottom" height={36} />
                   </PieChart>
                 </ResponsiveContainer>
               </div>
